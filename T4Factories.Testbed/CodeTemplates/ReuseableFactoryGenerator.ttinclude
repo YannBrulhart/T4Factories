@@ -76,11 +76,20 @@ public class FactoryTemplate : Template
         }
     }
 
+    public int GetGenericArgumentCount(string fullTypeName)
+    {
+        return fullTypeName.Count(o => o == '<' || o == ',');
+    }
+
     public void WithContract(string contractInterfaceName)
     {
+        var genericParametersCount = GetGenericArgumentCount(contractInterfaceName);
+
         try 
         {
-            this.contractType = this.allInterfaces.SingleOrDefault(x => x.Name == contractInterfaceName) ?? this.allInterfaces.Single(x => x.FullName == contractInterfaceName);
+            var interfaceName = contractInterfaceName.TrimEnd('<', ',', '>');
+            
+            this.contractType = this.allInterfaces.SingleOrDefault(x => x.Name == interfaceName && genericParametersCount == GetGenericArgumentCount(x.FullName)) ?? this.allInterfaces.Single(x => x.FullName == contractInterfaceName);
         }
         catch (InvalidOperationException)
         {
